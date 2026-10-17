@@ -1,8 +1,38 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function App() {
   const [tasks, setTasks] = useState([])
   const [text, setText] = useState('')
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/tasks')
+      .then((res) => {
+        if (!res.ok) throw new Error(res.status)
+        return res.json()
+      })
+      .then((data) => {
+        setTasks(data)
+        setLoaded(true)
+      })
+      .catch(() => setError('タスクの読み込みに失敗しました'))
+  }, [])
+
+  // 読み込み完了後、タスクが変わるたびにファイルへ保存する
+  useEffect(() => {
+    if (!loaded) return
+    fetch('/api/tasks', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tasks),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(res.status)
+        setError('')
+      })
+      .catch(() => setError('タスクの保存に失敗しました'))
+  }, [tasks, loaded])
 
   const addTask = (e) => {
     e.preventDefault()
@@ -20,6 +50,7 @@ export default function App() {
   return (
     <main className="app">
       <h1>タスクボード</h1>
+      {error && <p className="error" role="alert">{error}</p>}
       <form className="add-form" onSubmit={addTask}>
         <input
           type="text"

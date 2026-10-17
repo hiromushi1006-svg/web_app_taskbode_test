@@ -70,3 +70,7 @@ button.delete {
   color: #9ca3af;
   background: #ececec;
 }
+
+.error {
+  color: #dc2626;
+}
