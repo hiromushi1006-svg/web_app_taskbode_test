@@ -50,5 +50,7 @@ function tasksApi() {
 }
 
 export default defineConfig({
+  // GitHub Pages(/リポジトリ名/)でも動くよう相対パスにする
+  base: './',
   plugins: [react(), tasksApi()],
 })

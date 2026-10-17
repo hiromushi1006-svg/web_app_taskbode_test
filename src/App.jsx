@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { loadTasks, saveTasks } from './storage.js'
 
 export default function App() {
   const [tasks, setTasks] = useState([])
@@ -7,11 +8,7 @@ export default function App() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/tasks')
-      .then((res) => {
-        if (!res.ok) throw new Error(res.status)
-        return res.json()
-      })
+    loadTasks()
       .then((data) => {
         setTasks(data)
         setLoaded(true)
@@ -19,18 +16,11 @@ export default function App() {
       .catch(() => setError('タスクの読み込みに失敗しました'))
   }, [])
 
-  // 読み込み完了後、タスクが変わるたびにファイルへ保存する
+  // 読み込み完了後、タスクが変わるたびに保存する
   useEffect(() => {
     if (!loaded) return
-    fetch('/api/tasks', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(tasks),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(res.status)
-        setError('')
-      })
+    saveTasks(tasks)
+      .then(() => setError(''))
       .catch(() => setError('タスクの保存に失敗しました'))
   }, [tasks, loaded])
 
